@@ -18,21 +18,29 @@ def ticker_to_name(ticker: str) -> str:
         return stock.get_market_ticker_name(ticker=ticker)
 
 
-def get_lookback_fromdate(fromdate: str, lookback: int, freq: str) -> str:
+def get_lookback_fromdate(fromdate: str, lookback: int, freq: str, data_source: str = 'kospi') -> str:
     # freq에 따라 룩백 기간 포함된 예상 시작 날짜를 설정
     if freq == 'd':
-        estimated_start_date = pd.to_datetime(fromdate) - pd.DateOffset(days=lookback*2)
+        estimated_start_date = pd.to_datetime(fromdate) - pd.DateOffset(days=lookback * 2)
     elif freq == 'm':
         estimated_start_date = pd.to_datetime(fromdate) - pd.DateOffset(months=lookback)
     elif freq == 'y':
         estimated_start_date = pd.to_datetime(fromdate) - pd.DateOffset(years=lookback)
     else:
-        raise ValueError
-    # 설정 기간(estimated_start_date ~ fromdate)의 KOSPI 데이터를 다운로드
-    kospi = stock.get_index_ohlcv(fromdate=str(estimated_start_date.date()),
-                                  todate=fromdate, ticker='1001', freq=freq)
-    # 룩백 기간을 포함하는 정확한 시작 날짜를 반환
-    return str(kospi.index[-lookback].date())
+        raise ValueError("Invalid frequency. Use 'd', 'm', or 'y'.")
+
+    # 데이터 소스에 따라 KOSPI 또는 SPY 데이터를 다운로드
+    if data_source == 'kospi':
+        kospi = stock.get_index_ohlcv(fromdate=str(estimated_start_date.date()),
+                                      todate=fromdate, ticker='1001', freq=freq)
+        # 룩백 기간을 포함하는 정확한 시작 날짜를 반환
+        return str(kospi.index[-lookback].date())
+    elif data_source == 'spy':
+        spy = yf.download('SPY', start=str(estimated_start_date.date()), end=fromdate, interval=freq)
+        # 룩백 기간을 포함하는 정확한 시작 날짜를 반환
+        return str(spy.index[-lookback].date())
+    else:
+        raise ValueError("Invalid data source. Use 'kospi' or 'spy'.")
 
 
 # Simulation utility

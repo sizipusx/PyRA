@@ -5,6 +5,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from pykrx import stock
+import yfinance as yf
 
 from simulation.account import Account
 from simulation.order import Order

@@ -1,6 +1,24 @@
 # coding: utf-8
 import pandas as pd
 from plotly import graph_objects as go, express as px
+import plotly.io as pio
+
+pio.templates["myID"] = go.layout.Template(
+    layout_annotations=[
+        dict(
+            name="draft watermark",
+            text="Graph by 기하급수적",
+            textangle=0,
+            opacity=0.5,
+            font=dict(color="black", size=10),
+            xref="paper",
+            yref="paper",
+            x=0.9,
+            y=0.2,
+            showarrow=False,
+        )
+    ]
+)
 
 
 def plot_cumulative_return(returns: pd.Series, benchmark_returns: pd.Series,
@@ -14,6 +32,7 @@ def plot_cumulative_return(returns: pd.Series, benchmark_returns: pd.Series,
     # 그래프 객체
     fig = go.Figure()
     # 포트폴리오의 누적 수익률 곡선
+    titles = dict(text= f'<b>{strategy_name} 포트폴리오의 누적 수익률</b>', x=0.5, y = 0.9, xanchor='center', yanchor= 'top') 
     fig.add_trace(go.Scatter(x=cum_returns.index, y=cum_returns,
                              name=strategy_name))
     # KOSPI의 누적 수익률 곡선
@@ -23,11 +42,11 @@ def plot_cumulative_return(returns: pd.Series, benchmark_returns: pd.Series,
     fig.update_xaxes(tickformat='%Y-%m-%d')
     # 그래프 설정
     fig.update_layout(
-        width=800,
-        height=400,
+        title = titles, titlefont_size=15, legend=dict(orientation="h"),
         xaxis_title='날짜',
         yaxis_title='누적 수익률',
         legend_title_text='포트폴리오',
+        template="myID"
     )
     fig.show()
 
@@ -36,6 +55,7 @@ def plot_single_period_return(returns: pd.Series,
                               benchmark_returns: pd.Series,
                               strategy_name: str = 'My Strategy',
                               benchmark_name: str = 'KOSPI') -> None:
+    titles = dict(text= f'<b>{strategy_name} 포트폴리오의 누적 수익률</b>', x=0.5, y = 0.9, xanchor='center', yanchor= 'top')
     fig = go.Figure()
     fig.add_trace(go.Bar(x=returns.index, y=returns,
                          name=strategy_name))
@@ -43,11 +63,11 @@ def plot_single_period_return(returns: pd.Series,
                          name=benchmark_name, marker_pattern_shape='/'))
     fig.update_xaxes(tickformat='%Y-%m-%d')
     fig.update_layout(
-        width=800,
-        height=400,
+        title = titles, titlefont_size=15, legend=dict(orientation="h"),
         xaxis_title='날짜',
         yaxis_title='수익률',
         legend_title_text='포트폴리오',
+        template="myID"
     )
     fig.show()
 
@@ -56,15 +76,16 @@ def plot_relative_single_period_return(returns: pd.Series,
                                        benchmark_returns: pd.Series) -> None:
     relative_returns = returns - benchmark_returns
 
+    titles = dict(text= f'<b>포트폴리오 벤치마크 대비 상대 수익률</b>', x=0.5, y = 0.9, xanchor='center', yanchor= 'top')
     fig = go.Figure()
     fig.add_trace(go.Bar(x=relative_returns.index, y=relative_returns))
     fig.update_xaxes(tickformat='%Y-%m-%d')
     fig.update_layout(
-        width=800,
-        height=400,
+        title = titles, titlefont_size=15, legend=dict(orientation="h"),
         xaxis_title='날짜',
         yaxis_title='상대 수익률',
         legend_title_text=None,
+        template="myID"
     )
     fig.show()
 
@@ -85,6 +106,7 @@ def plot_cumulative_asset_profit(df_portfolio: pd.DataFrame) -> None:
     from plotly.validators.scatter.marker import SymbolValidator
     raw_symbols = SymbolValidator().values[2::12]
 
+    titles = dict(text= f'<b>Asset 개별 수익률</b>', x=0.5, y = 0.9, xanchor='center', yanchor= 'top')
     fig = go.Figure()
     for idx, col in enumerate(df_asset_cumulative_profit.columns):
         if 'cash' in col:
@@ -95,11 +117,11 @@ def plot_cumulative_asset_profit(df_portfolio: pd.DataFrame) -> None:
                                  marker={'symbol': raw_symbols[idx]}))
     fig.update_xaxes(tickformat='%Y-%m-%d')
     fig.update_layout(
-        width=800,
-        height=400,
+        title = titles, titlefont_size=15, legend=dict(orientation="h"),
         xaxis_title='날짜',
         yaxis_title='누적 수익률',
         legend_title_text='종목코드',
+        template="myID"
     )
     fig.show()
 
@@ -118,14 +140,15 @@ def plot_asset_weight(df_portfolio: pd.DataFrame) -> None:
         weight=df_portfolio['value'].groupby('date').transform(lambda x: x / x.sum())
     )
 
+    titles = dict(text= f'<b>Asset 편입 비중 변화</b>', x=0.5, y = 0.9, xanchor='center', yanchor= 'top')
     fig = px.area(data_frame=df_portfolio, y='weight',
                   color='ticker', pattern_shape='ticker')
     fig.update_xaxes(tickformat='%Y-%m-%d')
     fig.update_layout(
-        width=800,
-        height=400,
+        title = titles, titlefont_size=15, legend=dict(orientation="h"),
         xaxis_title='날짜',
         yaxis_title='자산편입비중',
         legend_title_text='종목코드',
+        template="myID"
     )
     fig.show()
